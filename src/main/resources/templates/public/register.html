@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng ký tài khoản</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --card-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            --hover-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #3b82f6 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                    radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .auth-container {
+            padding: 2rem 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+        }
+
+        .register-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .register-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 6px;
+            background: var(--primary-gradient);
+        }
+
+        .register-card:hover {
+            box-shadow: var(--hover-shadow);
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: transparent;
+            border: none;
+            text-align: center;
+            padding: 2.5rem 2rem 1rem;
+        }
+
+        .header-icon {
+            width: 80px;
+            height: 80px;
+            background: var(--primary-gradient);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);
+            transform: rotate(-5deg);
+            transition: all 0.3s ease;
+        }
+
+        .header-icon:hover {
+            transform: rotate(0deg) scale(1.05);
+        }
+
+        .header-icon i {
+            font-size: 2rem;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .card-subtitle {
+            color: #6c757d;
+            font-size: 1.1rem;
+            margin-bottom: 0;
+        }
+
+        .form-floating {
+            margin-bottom: 1.5rem;
+            position: relative;
+        }
+
+        .form-control {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1rem 1.25rem;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            background: white;
+            transform: translateY(-2px);
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+            z-index: 5;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+
+        .password-toggle:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-register {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-register::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-register:hover::before {
+            left: 100%;
+        }
+
+        .btn-register:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 35px rgba(102, 126, 234, 0.4);
+        }
+
+        .form-check {
+            margin: 1.5rem 0;
+            padding-left: 0;
+        }
+
+        .form-check-input {
+            width: 1.25rem;
+            height: 1.25rem;
+            margin-right: 0.75rem;
+            border: 2px solid #dee2e6;
+            border-radius: 6px;
+        }
+
+        .form-check-input:checked {
+            background-color: #667eea;
+            border-color: #667eea;
+        }
+
+        .form-check-label {
+            font-size: 0.95rem;
+            color: #6c757d;
+            line-height: 1.5;
+        }
+
+        .form-check-label a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .form-check-label a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 2rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .login-link p {
+            color: #6c757d;
+            margin-bottom: 0;
+            font-size: 1rem;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .login-link a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .invalid-feedback {
+            font-size: 0.875rem;
+            color: #dc3545;
+            margin-top: 0.25rem;
+        }
+
+        .row-custom {
+            margin: 0 -0.75rem;
+        }
+
+        .col-custom {
+            padding: 0 0.75rem;
+        }
+
+        @media (max-width: 768px) {
+            .auth-container {
+                padding: 1rem 0;
+            }
+
+            .register-card {
+                margin: 1rem;
+                border-radius: 16px;
+            }
+
+            .card-header {
+                padding: 2rem 1.5rem 1rem;
+            }
+
+            .card-title {
+                font-size: 1.75rem;
+            }
+
+            .header-icon {
+                width: 60px;
+                height: 60px;
+            }
+
+            .header-icon i {
+                font-size: 1.5rem;
+            }
+        }
+
+        /* Animation for form elements */
+        .form-group {
+            animation: slideUp 0.6s ease forwards;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .form-group:nth-child(1) { animation-delay: 0.1s; }
+        .form-group:nth-child(2) { animation-delay: 0.2s; }
+        .form-group:nth-child(3) { animation-delay: 0.3s; }
+        .form-group:nth-child(4) { animation-delay: 0.4s; }
+        .form-group:nth-child(5) { animation-delay: 0.5s; }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="auth-container">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-xl-7">
+                <div class="register-card">
+                    <div class="card-header">
+                        <div class="header-icon">
+                            <i class="fas fa-user-plus"></i>
+                        </div>
+                        <h2 class="card-title">Đăng ký tài khoản</h2>
+                        <p class="card-subtitle">Tạo tài khoản để bắt đầu thuê xe</p>
+                    </div>
+
+                    <div class="card-body px-4 pb-4">
+                        <form action="/api/v1/public/register" method="post" class="needs-validation" novalidate>
+                            <div class="row row-custom">
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="customerName" class="form-label">Họ và tên *</label>
+                                        <input type="text" class="form-control" id="customerName" name="customerName" required>
+                                        <div class="invalid-feedback">
+                                            Vui lòng nhập họ và tên
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="email" class="form-label">Email *</label>
+                                        <input type="email" class="form-control" id="email" name="email" required>
+                                        <div class="invalid-feedback">
+                                            Vui lòng nhập email hợp lệ
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row row-custom">
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="mobile" class="form-label">Số điện thoại *</label>
+                                        <input type="tel" class="form-control" id="mobile" name="mobile" pattern="[0-9]{10,11}" required>
+                                        <div class="invalid-feedback">
+                                            Vui lòng nhập số điện thoại hợp lệ
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="birthday" class="form-label">Ngày sinh *</label>
+                                        <input type="date" class="form-control" id="birthday" name="birthday" required>
+                                        <div class="invalid-feedback">
+                                            Vui lòng chọn ngày sinh
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row row-custom">
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="identityCard" class="form-label">CMND/CCCD *</label>
+                                        <input type="text" class="form-control" id="identityCard" name="identityCard" pattern="[0-9]{9,12}" required>
+                                        <div class="invalid-feedback">
+                                            Vui lòng nhập CMND/CCCD hợp lệ
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="licenceNumber" class="form-label">Số bằng lái xe *</label>
+                                        <input type="text" class="form-control" id="licenceNumber" name="licenceNumber" required>
+                                        <div class="invalid-feedback">
+                                            Vui lòng nhập số bằng lái xe
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row row-custom">
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="licenceDate" class="form-label">Ngày cấp bằng lái *</label>
+                                        <input type="date" class="form-control" id="licenceDate" name="licenceDate" required>
+                                        <div class="invalid-feedback">
+                                            Vui lòng chọn ngày cấp bằng lái
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 col-custom">
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">Mật khẩu *</label>
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" id="password" name="password" minlength="6" required>
+                                            <button type="button" class="password-toggle" onclick="togglePassword('password')">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </div>
+                                        <div class="invalid-feedback">
+                                            Mật khẩu phải có ít nhất 6 ký tự
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="confirmPassword" class="form-label">Xác nhận mật khẩu *</label>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" required>
+                                    <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="invalid-feedback">
+                                    Mật khẩu xác nhận không khớp
+                                </div>
+                            </div>
+
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="agreeTerms" required>
+                                <label class="form-check-label" for="agreeTerms">
+                                    Tôi đồng ý với <a href="#" class="text-primary">Điều khoản sử dụng</a> và <a href="#" class="text-primary">Chính sách bảo mật</a>
+                                </label>
+                                <div class="invalid-feedback">
+                                    Vui lòng đồng ý với điều khoản sử dụng
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-register">
+                                <i class="fas fa-user-plus me-2"></i>Đăng ký tài khoản
+                            </button>
+                        </form>
+
+                        <div class="login-link">
+                            <p>
+                                Đã có tài khoản?
+                                <a href="/api/v1/public/login">Đăng nhập ngay</a>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function togglePassword(fieldId) {
+        const field = document.getElementById(fieldId);
+        const icon = field.nextElementSibling.querySelector('i');
+
+        if (field.type === 'password') {
+            field.type = 'text';
+            icon.classList.remove('fa-eye');
+            icon.classList.add('fa-eye-slash');
+        } else {
+            field.type = 'password';
+            icon.classList.remove('fa-eye-slash');
+            icon.classList.add('fa-eye');
+        }
+    }
+
+    // Form validation
+    (function() {
+        'use strict';
+        window.addEventListener('load', function() {
+            const forms = document.getElementsByClassName('needs-validation');
+            const validation = Array.prototype.filter.call(forms, function(form) {
+                form.addEventListener('submit', function(event) {
+                    // Check password confirmation
+                    const password = document.getElementById('password').value;
+                    const confirmPassword = document.getElementById('confirmPassword').value;
+
+                    if (password !== confirmPassword) {
+                        document.getElementById('confirmPassword').setCustomValidity('Mật khẩu xác nhận không khớp');
+                    } else {
+                        document.getElementById('confirmPassword').setCustomValidity('');
+                    }
+
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            });
+        }, false);
+    })();
+
+    // Password confirmation validation on input
+    document.getElementById('confirmPassword').addEventListener('input', function() {
+        const password = document.getElementById('password').value;
+        const confirmPassword = this.value;
+
+        if (password !== confirmPassword) {
+            this.setCustomValidity('Mật khẩu xác nhận không khớp');
+        } else {
+            this.setCustomValidity('');
+        }
+    });
+</script>
+</body>
+</html>

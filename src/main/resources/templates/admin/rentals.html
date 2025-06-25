@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/admin}">
+<head>
+    <title>Quản lý thuê xe</title>
+    <th:block th:with="pageTitle='Quản lý thuê xe', activeMenu='rentals'"></th:block>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+
+<body>
+<section layout:fragment="content">
+    <div class="container-fluid">
+        <!-- Page Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2 class="h3 mb-0">Quản lý thuê xe</h2>
+                <p class="text-muted">Quản lý các giao dịch thuê xe trong hệ thống</p>
+            </div>
+        </div>
+
+        <!-- Search and Filter -->
+        <div class="card mb-4">
+            <div class="card-body">
+                <form th:action="@{/admin/rentals}" method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" class="form-control" name="search" th:value="${param.search}"
+                                   placeholder="Tìm kiếm giao dịch...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select class="form-select" name="status" th:value="${param.status}">
+                            <option value="">Tất cả trạng thái</option>
+                            <option value="PENDING" th:selected="${param.status == 'PENDING'}">Chờ duyệt</option>
+                            <option value="ACTIVE" th:selected="${param.status == 'ACTIVE'}">Đang thuê</option>
+                            <option value="COMPLETED" th:selected="${param.status == 'COMPLETED'}">Hoàn thành</option>
+                            <option value="CANCELLED" th:selected="${param.status == 'CANCELLED'}">Đã hủy</option>
+                            <option value="OVERDUE" th:selected="${param.status == 'OVERDUE'}">Quá hạn</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" class="form-control" name="fromDate" th:value="${param.fromDate}"
+                               placeholder="Từ ngày">
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary">Tìm kiếm</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Rentals Table -->
+        <div class="card shadow">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                        <tr>
+                            <th>STT</th>
+                            <th>Khách hàng</th>
+                            <th>Xe</th>
+                            <th>Ngày nhận</th>
+                            <th>Ngày trả</th>
+                            <th>Tổng tiền</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="rental, iterStat : ${rentals}">
+                            <td th:text="${iterStat.index + 1}">1</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm me-2">
+                                        <i class="fas fa-user-circle fa-2x text-muted"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-weight-bold" th:text="${rental.customer.customerName}">Nguyễn
+                                            Văn A
+                                        </div>
+                                        <small class="text-muted" th:text="${rental.customer.mobile}">0123456789</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="car-image me-2">
+                                        <i class="fas fa-car fa-2x text-primary"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-weight-bold" th:text="${rental.car.carName}">Toyota Camry</div>
+                                        <small class="text-muted" th:text="${rental.car.color}">Trắng</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td th:text="${rental.rentDate}">20/01/2024</td>
+                            <td th:text="${rental.returnDate}">25/01/2024</td>
+                            <td class="text-success font-weight-bold" th:text="${rental.rentPrice}">₫4,000,000</td>
+                            <td>
+                                <span th:class="'badge bg-' +
+                                    (${rental.status.name() == 'PENDING'} ? 'wating' :
+                                    (${rental.status.name() == 'BOOKED'} ? 'success' :
+                                    (${rental.status.name() == 'PICKED_UP'} ? 'success' :
+                                    (${rental.status.name() == 'RETURNED'} ? 'danger' :
+                                    (${rental.status.name() == 'CANCELED'} ? 'secondary' : 'light')))))"
+                                      th:text="${rental.status.name() == 'PENDING' ? 'Chờ duyệt' :
+                                    (rental.status.name() == 'PENDING' ? 'Cho duyet' :
+                                    (rental.status.name() == 'BOOKED' ? 'Hoàn thành' :
+                                    (rental.status.name() == 'CANCELED' ? 'Đã hủy' :
+                                    (rental.status.name() == 'RETURNED' ? 'Đã Thuê' : 'Không xác định'))))}">
+                                    Trạng thái
+                                </span>
+                            </td>
+                            <td>
+
+                            <td>
+                                <!-- Duyệt (BOOKED) -->
+                                <a th:href="@{/api/v1/admin/rentals/update-status(customerId=${rental.customer.customerId}, carId=${rental.car.carId}, status='BOOKED')}"
+                                   class="btn btn-sm btn-outline-success me-1"
+                                   th:if="${rental.status.name() == 'PENDING'}"
+                                   th:onclick="|return confirm('Bạn có chắc chắn muốn duyệt đơn thuê của khách hàng ID ${rental.customer.customerId}?');|">
+                                    <i class="fas fa-check"></i> Duyệt
+                                </a>
+
+                                <!-- Hủy (CANCELED) -->
+                                <a th:href="@{/api/v1/admin/rentals/update-status(customerId=${rental.customer.customerId}, carId=${rental.car.carId}, status='CANCELED')}"
+                                   class="btn btn-sm btn-outline-danger me-1"
+                                   th:if="${rental.status.name() != 'CANCELED' and rental.status.name() != 'RETURNED'}"
+                                   th:onclick="|return confirm('Bạn có chắc chắn muốn hủy đơn thuê của khách hàng ID ${rental.customer.customerId}?');|">
+                                    <i class="fas fa-times"></i> Hủy
+                                </a>
+
+                                <!-- Đã nhận xe (PICKED_UP) -->
+                                <a th:href="@{/api/v1/admin/rentals/update-status(customerId=${rental.customer.customerId}, carId=${rental.car.carId}, status='PICKED_UP')}"
+                                   class="btn btn-sm btn-outline-primary me-1"
+                                   th:if="${rental.status.name() == 'BOOKED'}"
+                                   th:onclick="|return confirm('Xác nhận khách ID ${rental.customer.customerId} đã nhận xe?');|">
+                                    <i class="fas fa-car"></i> Đã nhận xe
+                                </a>
+
+                                <!-- Đã trả xe (RETURNED) -->
+                                <a th:href="@{/api/v1/admin/rentals/update-status(customerId=${rental.customer.customerId}, carId=${rental.car.carId}, status='RETURNED')}"
+                                   class="btn btn-sm btn-outline-dark me-1"
+                                   th:if="${rental.status.name() == 'PICKED_UP'}"
+                                   th:onclick="|return confirm('Xác nhận khách ID ${rental.customer.customerId} đã trả xe?');|">
+                                    <i class="fas fa-undo"></i> Đã trả xe
+                                </a>
+
+                                <!-- Trạng thái hiện tại -->
+                                <span class="badge bg-secondary" th:text="${rental.status}"></span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+</body>
+</html>

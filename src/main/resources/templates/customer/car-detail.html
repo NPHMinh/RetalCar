@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="vi"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/customer}">
+
+<head>
+    <title layout:fragment="title">Chi tiết xe</title>
+</head>
+
+<div layout:fragment="content">
+    <div class="container py-5">
+        <div class="row">
+            <!-- Ảnh xe -->
+            <div class="col-lg-6 mb-4">
+                <img th:src="@{/images/cars/default.png}" alt="Car Image"
+                     class="img-fluid rounded shadow" />
+                <span class="badge mt-2"
+                      th:classappend="${car.status.name() == 'AVAILABLE'} ? 'bg-success' : 'bg-secondary'"
+                      th:text="${car.status.name() == 'AVAILABLE'} ? 'Có sẵn' : 'Đang thuê'"></span>
+            </div>
+
+            <!-- Thông tin và Form -->
+            <div class="col-lg-6">
+                <h2 th:text="${car.carName}">Tên xe</h2>
+                <p class="text-muted" th:text="${car.description}">Mô tả xe</p>
+
+                <ul class="list-unstyled mb-4">
+                    <li><strong>Năm sản xuất:</strong> <span th:text="${car.carModelYear}"></span></li>
+                    <li><strong>Số chỗ:</strong> <span th:text="${car.capacity}"></span></li>
+                    <li><strong>Màu sắc:</strong> <span th:text="${car.color}"></span></li>
+                    <li><strong>Hãng sản xuất:</strong> <span th:text="${car.producer.producerName}"></span></li>
+                    <li><strong>Ngày nhập:</strong> <span th:text="${#temporals.format(car.importDate, 'dd/MM/yyyy')}"></span></li>
+                    <li><strong>Giá thuê/ngày:</strong> <span th:text="${#numbers.formatCurrency(car.rentPrice)}"></span></li>
+                </ul>
+
+                <!-- Form Đặt Xe -->
+                <form th:action="@{/api/v1/customers/cars/rental}" method="post">
+                    <input type="hidden" name="carId" th:value="${car.carId}" />
+
+                    <div class="mb-3">
+                        <label for="pickupDate">Ngày nhận xe:</label>
+                        <input type="date" class="form-control" id="pickupDate" name="pickupDate" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="returnDate">Ngày trả xe:</label>
+                        <input type="date" class="form-control" id="returnDate" name="returnDate" required />
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Số ngày thuê:</label>
+                        <span id="totalDays">0</span> ngày
+                    </div>
+
+                    <div class="mb-3">
+                        <label>Tổng tiền:</label>
+                        <span id="totalPrice">₫0</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100"
+                            th:disabled="${car.status.name() != 'AVAILABLE'}">
+                        <i class="fas fa-car-side me-2"></i>
+                        <span th:if="${car.status.name() == 'AVAILABLE'}">Đặt xe ngay</span>
+                        <span th:if="${car.status.name() != 'AVAILABLE'}">Xe không khả dụng</span>
+                    </button>
+                </form>
+
+                <!-- Thông báo -->
+                <div th:if="${success}" class="alert alert-success mt-3" th:text="${success}"></div>
+                <div th:if="${error}" class="alert alert-danger mt-3" th:text="${error}"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script tính tiền -->
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function () {
+            const pickup = document.getElementById('pickupDate');
+            const ret = document.getElementById('returnDate');
+            const rentPrice = /*[[${car.rentPrice}]]*/ 0;
+
+            function updateTotal() {
+                const start = new Date(pickup.value);
+                const end = new Date(ret.value);
+                const oneDay = 1000 * 60 * 60 * 24;
+                const days = Math.ceil((end - start) / oneDay);
+
+                if (!isNaN(days) && days > 0) {
+                    document.getElementById('totalDays').textContent = days;
+                    const total = rentPrice * days;
+                    document.getElementById('totalPrice').textContent =
+                        new Intl.NumberFormat('vi-VN', {
+                            style: 'currency',
+                            currency: 'VND'
+                        }).format(total);
+                } else {
+                    document.getElementById('totalDays').textContent = '0';
+                    document.getElementById('totalPrice').textContent = '₫0';
+                }
+            }
+
+            pickup.addEventListener('change', updateTotal);
+            ret.addEventListener('change', updateTotal);
+        });
+    </script>
+</div>
+</html>

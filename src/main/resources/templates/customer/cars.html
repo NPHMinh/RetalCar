@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{layout/customer}">
+<head>
+    <title>Danh sách xe cho thuê | FU Car Rental</title>
+    <meta name="description" content="Tìm kiếm và thuê xe ô tô chất lượng cao tại FU Car Rental.">
+    <link rel="stylesheet" th:href="@{/css/customer.css}"/>
+    <style>
+        .car-card {
+            border: 1px solid #e0e0e0;
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            background-color: #ffffff;
+        }
+
+        .car-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+        }
+
+        .car-image {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 aspect ratio */
+            overflow: hidden;
+            background-color: #f9f9f9;
+        }
+
+        .car-image img {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .car-badge {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+        }
+
+        .car-info {
+            padding: 16px;
+            flex-grow: 1;
+        }
+
+        .car-name {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .car-details p {
+            font-size: 0.95rem;
+            color: #555;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .price-amount {
+            font-weight: bold;
+            color: #28a745;
+            font-size: 1.1rem;
+        }
+
+        .card-footer {
+            background-color: #f8f9fa;
+            padding: 12px 16px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+    </style>
+</head>
+
+<body>
+    <div layout:fragment="content">
+        <div class="container py-4">
+
+            <h2 class="mb-4">Tìm xe phù hợp</h2>
+
+        <!-- Hiển thị thông báo nếu có -->
+        <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+        <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+        <!-- Form lọc -->
+        <form action="#" method="get" class="row g-3 mb-5">
+            <div class="col-md-3">
+                <label class="form-label">Ngày nhận</label>
+                <input type="date" name="pickupDate" class="form-control" th:value="${pickupDate}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Giờ nhận</label>
+                <input type="time" name="pickupTime" class="form-control" th:value="${pickupTime}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Ngày trả</label>
+                <input type="date" name="returnDate" class="form-control" th:value="${returnDate}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Giờ trả</label>
+                <input type="time" name="returnTime" class="form-control" th:value="${returnTime}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">Số chỗ</label>
+                <select name="capacity" class="form-select">
+                    <option th:value="''" th:selected="${capacity == ''}">Tất cả</option>
+
+
+                    <option th:value="4" th:selected="${capacity == 4}">4 chỗ</option>
+                    <option th:value="5" th:selected="${capacity == 5}">5 chỗ</option>
+                    <option th:value="7" th:selected="${capacity == 7}">7 chỗ</option>
+                    <option th:value="9" th:selected="${capacity == 9}">9 chỗ</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Khoảng giá</label>
+                <select name="priceRange" class="form-select">
+                    <option th:value="''" th:selected="${priceRange == ''}">Tất cả</option>
+                    <option th:value="0-500000" th:selected="${priceRange == '0-500000'}">Dưới 500k</option>
+                    <option th:value="500000-1000000" th:selected="${priceRange == '500000-1000000'}">500k - 1M</option>
+                    <option th:value="1000000-2000000" th:selected="${priceRange == '1000000-2000000'}">1M - 2M</option>
+                    <option th:value="2000000-999999999" th:selected="${priceRange == '2000000-999999999'}">Trên 2M
+                    </option>
+                </select>
+            </div>
+            <div class="col-md-2 align-self-end">
+                <button type="submit" class="btn btn-primary w-100">Lọc</button>
+            </div>
+        </form>
+
+        <!-- Không có xe -->
+        <div class="row" th:if="${#lists.isEmpty(cars)}">
+            <div class="col-12">
+                <p class="text-muted">Không tìm thấy xe phù hợp.</p>
+            </div>
+        </div>
+
+        <!-- Danh sách xe -->
+        <div class="row row-cols-1 row-cols-md-2 g-4">
+            <div class="col" th:each="car : ${cars}">
+                <div class="car-card card h-100">
+                    <div class="car-image">
+<!--                        <img th:src="@{'/images/cars/' + ${car.carId} + '.jpg'}"-->
+<!--                             th:alt="${car.carName}" class="card-img-top"-->
+<!--                             onerror="this.src='/placeholder.svg?text=No+Image'"/>-->
+                        <div class="car-badge">
+                    <span class="badge"
+                          th:classappend="${car.status.name() == 'AVAILABLE'} ? 'bg-success' : 'bg-secondary'"
+                          th:text="${car.status.name() == 'AVAILABLE' ? 'Có sẵn' : 'Không sẵn'}">
+                    </span>
+                        </div>
+                    </div>
+                    <div class="car-info">
+                        <h5 class="car-name" th:text="${car.carName}">Tên xe</h5>
+                        <div class="car-details">
+                            <p>
+                                <strong>Năm:</strong> <span th:text="${car.carModelYear}">2023</span><br/>
+                                <strong>Số chỗ:</strong> <span th:text="${car.capacity}">5</span><br/>
+                                <strong>Màu:</strong> <span th:text="${car.color}">Đen</span><br/>
+                                <strong>Giá thuê:</strong>
+                                <span class="price-amount"
+                                      th:text="'₫' + ${#numbers.formatDecimal(car.rentPrice, 0, 'COMMA', 0, 'POINT')}">
+                        </span>/ngày
+                            </p>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a class="btn btn-outline-info btn-sm"
+                           th:href="@{'/api/v1/customers/cars/' + ${car.carId}}">
+                            <i class="fas fa-eye me-1"></i>Chi tiết
+                        </a>
+                        <form th:action="@{/api/v1/customers/cars/rental}" method="post" class="d-inline">
+                            <input type="hidden" name="carId" th:value="${car.carId}"/>
+                            <input type="hidden" name="pickupDate" th:value="${pickupDate}"/>
+                            <input type="hidden" name="returnDate" th:value="${returnDate}"/>
+                            <button type="submit" class="btn btn-primary btn-sm"
+                                    th:disabled="${car.status.name() != 'AVAILABLE'}">
+                                <i class="fas fa-calendar-plus me-1"></i>Đặt xe
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+</body>
+</html>
